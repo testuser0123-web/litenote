@@ -10,6 +10,9 @@ export async function GET() {
   if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL) {
     missingEnvVars.push('DATABASE_URL or POSTGRES_URL');
   }
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    missingEnvVars.push('BLOB_READ_WRITE_TOKEN');
+  }
   
   const hasAllRequiredVars = missingEnvVars.length === 0;
   
@@ -22,6 +25,7 @@ export async function GET() {
     hasGoogleOAuth: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
     hasDatabase: !!(process.env.DATABASE_URL || process.env.POSTGRES_URL),
     hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
+    hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN,
     timestamp: new Date().toISOString()
   });
 }

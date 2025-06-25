@@ -218,22 +218,16 @@ export async function DELETE(request: NextRequest) {
     await client.query('DELETE FROM notes WHERE id = $1 AND user_id = $2', [id, session.user.id]);
     client.release();
     
-    // Delete physical files
+    // Delete blob files
     if (imagesResult.rows.length > 0) {
-      const fs = require('fs');
-      const path = require('path');
+      const { del } = require('@vercel/blob');
       
       for (const row of imagesResult.rows) {
-        if (row.image_url.startsWith('/uploads/')) {
-          const filePath = path.join(process.cwd(), 'public', row.image_url);
-          try {
-            if (fs.existsSync(filePath)) {
-              fs.unlinkSync(filePath);
-              console.log('Physical file deleted:', filePath);
-            }
-          } catch (error) {
-            console.error('Error deleting physical file:', error);
-          }
+        try {
+          await del(row.image_url);
+          console.log('Blob file deleted:', row.image_url);
+        } catch (error) {
+          console.error('Error deleting blob file:', error);
         }
       }
     }

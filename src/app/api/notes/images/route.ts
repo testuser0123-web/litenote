@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
+import { put, del } from '@vercel/blob';
 import pool from '../../../../lib/db';
 import { authOptions } from '../../../../lib/auth';
 
@@ -48,25 +49,15 @@ export async function POST(request: NextRequest) {
     const timestamp = Date.now();
     const uniqueFilename = `${timestamp}-${Math.random().toString(36).substring(7)}.jpg`;
     
-    // Save file to public/uploads directory with compression
+    // Process the image file
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    
-    const fs = require('fs');
-    const path = require('path');
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-    
-    // Ensure uploads directory exists
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
+    let buffer = Buffer.from(bytes);
     
     // Compress image if it's too large
-    let finalBuffer = buffer;
     if (buffer.length > 1024 * 1024) { // If larger than 1MB
       try {
         const sharp = require('sharp');
-        finalBuffer = await sharp(buffer)
+        buffer = await sharp(buffer)
           .jpeg({ quality: 80 })
           .resize(1920, 1080, { 
             fit: 'inside',
@@ -75,15 +66,16 @@ export async function POST(request: NextRequest) {
           .toBuffer();
       } catch (error) {
         console.log('Sharp not available, using original file');
-        finalBuffer = buffer;
       }
     }
     
-    const filePath = path.join(uploadsDir, uniqueFilename);
-    fs.writeFileSync(filePath, finalBuffer);
+    // Upload to Vercel Blob Storage
+    const blob = await put(uniqueFilename, buffer, {
+      access: 'public',
+      contentType: 'image/jpeg'
+    });
     
-    // Create URL path
-    const imageUrl = `/uploads/${uniqueFilename}`;
+    const imageUrl = blob.url;
     
     // Save image reference to database
     const result = await client.query(
@@ -150,20 +142,12 @@ export async function DELETE(request: NextRequest) {
     
     client.release();
     
-    // Delete physical file if it's a local file (not base64)
-    if (imageInfo.image_url.startsWith('/uploads/')) {
-      const fs = require('fs');
-      const path = require('path');
-      const filePath = path.join(process.cwd(), 'public', imageInfo.image_url);
-      
-      try {
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-          console.log('Physical file deleted:', filePath);
-        }
-      } catch (error) {
-        console.error('Error deleting physical file:', error);
-      }
+    // Delete from Vercel Blob Storage
+    try {
+      await del(imageInfo.image_url);
+      console.log('Blob file deleted:', imageInfo.image_url);
+    } catch (error) {
+      console.error('Error deleting blob file:', error);
     }
     
     console.log('Image deleted:', imageId);

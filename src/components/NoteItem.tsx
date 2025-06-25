@@ -169,9 +169,8 @@ export default function NoteItem({
     if (note.images && note.images.length > 0) {
       copyText += '\n\n';
       note.images.forEach((image) => {
-        // Extract filename without extension from the image URL
-        const filename = image.image_url.split('/').pop()?.replace(/\.[^/.]+$/, '') || '';
-        copyText += `https://litenote-silk.vercel.app/image/${filename}\n`;
+        // Use Vercel Blob URL directly
+        copyText += `${image.image_url}\n`;
       });
     }
     

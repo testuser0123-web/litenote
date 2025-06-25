@@ -35,6 +35,9 @@ NEXTAUTH_URL=https://your-domain.vercel.app
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 
+# Vercel Blob Storage (for image uploads)
+BLOB_READ_WRITE_TOKEN=your-vercel-blob-token
+
 # Feature flag
 NEXT_PUBLIC_HAS_GOOGLE_OAUTH=true
 ```
@@ -55,14 +58,22 @@ Vercel Postgresを使用します：
 2. Postgresデータベースを作成
 3. 環境変数が自動的に設定されます
 
-### 4. 開発サーバー起動
+### 4. Vercel Blob設定
+
+画像アップロード用にVercel Blobを設定します：
+
+1. Vercelプロジェクトでストレージタブを開く
+2. Blobストレージを作成
+3. `BLOB_READ_WRITE_TOKEN`環境変数が自動的に設定されます
+
+### 5. 開発サーバー起動
 
 ```bash
 npm install
 npm run dev
 ```
 
-### 5. デプロイ
+### 6. デプロイ
 
 ```bash
 npm run build

@@ -18,6 +18,11 @@ if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL) {
   missingEnvVars.push('DATABASE_URL or POSTGRES_URL');
 }
 
+// Check Vercel Blob token
+if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  missingEnvVars.push('BLOB_READ_WRITE_TOKEN');
+}
+
 const hasGoogleCredentials = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET;
 
 if (missingEnvVars.length > 0) {
