@@ -2,18 +2,21 @@ import { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import pool from './db';
 
-// Check for required environment variables
-if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-  throw new Error('Missing required Google OAuth environment variables');
+// Check for required environment variables only in production
+const isProduction = process.env.NODE_ENV === 'production';
+const hasGoogleCredentials = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET;
+
+if (isProduction && !hasGoogleCredentials) {
+  console.error('Missing required Google OAuth environment variables');
 }
 
 export const authOptions: NextAuthOptions = {
-  providers: [
+  providers: hasGoogleCredentials ? [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-  ],
+  ] : [],
   secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-dev',
   debug: process.env.NODE_ENV === 'development',
   callbacks: {

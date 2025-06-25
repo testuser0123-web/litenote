@@ -95,6 +95,8 @@ export default function Home() {
   }
 
   if (status === 'unauthenticated') {
+    const hasGoogleCredentials = process.env.NEXT_PUBLIC_HAS_GOOGLE_OAUTH === 'true';
+    
     return (
       <div style={{
         display: 'flex',
@@ -120,25 +122,36 @@ export default function Home() {
           fontFamily: 'inherit'
         }}>
           <h1 style={{ marginBottom: '1rem', color: '#333', fontFamily: 'inherit' }}>LiteNote</h1>
-          <p style={{ marginBottom: '2rem', color: '#666', fontFamily: 'inherit' }}>ログインしてノートを管理しましょう</p>
-          <button
-            onClick={() => {
-              console.log('Login button clicked');
-              signIn('google');
-            }}
-            style={{
-              backgroundColor: '#4285f4',
-              color: 'white',
-              border: 'none',
-              padding: '12px 24px',
-              borderRadius: '8px',
-              fontSize: '16px',
-              cursor: 'pointer',
-              fontFamily: 'inherit'
-            }}
-          >
-            Googleでログイン
-          </button>
+          {hasGoogleCredentials ? (
+            <>
+              <p style={{ marginBottom: '2rem', color: '#666', fontFamily: 'inherit' }}>ログインしてノートを管理しましょう</p>
+              <button
+                onClick={() => {
+                  console.log('Login button clicked');
+                  signIn('google');
+                }}
+                style={{
+                  backgroundColor: '#4285f4',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit'
+                }}
+              >
+                Googleでログイン
+              </button>
+            </>
+          ) : (
+            <div>
+              <p style={{ marginBottom: '1rem', color: '#666', fontFamily: 'inherit' }}>環境変数が設定されていません</p>
+              <p style={{ marginBottom: '2rem', color: '#666', fontFamily: 'inherit', fontSize: '14px' }}>
+                Google OAuthの設定が必要です
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );

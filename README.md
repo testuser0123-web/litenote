@@ -1,51 +1,88 @@
 # LiteNote
 
-A simple note-taking app with PostgreSQL backend and React frontend.
+シンプルで高機能なノート管理アプリケーション
 
-## Features
+## 機能
 
-- Add and delete notes
-- Edit notes with toggle edit mode
-- Copy note content to clipboard using Font Awesome icons
-- Notes displayed in vertical column layout
-- Clean, responsive design
+- 🔐 Google OAuth認証
+- 📝 ユーザー固有のノート管理
+- 🔍 リアルタイム検索機能
+- ⭐ お気に入り機能
+- 📸 画像アップロード・管理
+- 🚀 楽観的UI
+- 📱 レスポンシブデザイン
+- 🇯🇵 日本語対応
 
-## Setup
+## セットアップ
 
-### Prerequisites
+### 1. 環境変数の設定
 
-- Node.js
-- PostgreSQL
+`.env.local` ファイルを作成し、以下の環境変数を設定してください：
 
-### Installation
+```bash
+# Database (Vercel Postgres)
+POSTGRES_URL=
+POSTGRES_PRISMA_URL=
+POSTGRES_URL_NO_SSL=
+POSTGRES_URL_NON_POOLING=
+DATABASE_URL=
 
-1. Install dependencies:
+# NextAuth
+NEXTAUTH_SECRET=your-secret-key-here
+NEXTAUTH_URL=https://your-domain.vercel.app
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# Feature flag
+NEXT_PUBLIC_HAS_GOOGLE_OAUTH=true
+```
+
+### 2. Google OAuth設定
+
+1. [Google Cloud Console](https://console.cloud.google.com/)でプロジェクトを作成
+2. OAuth 2.0 クライアントIDを作成
+3. 承認済みリダイレクトURIに以下を追加：
+   - `http://localhost:3000/api/auth/callback/google` (開発用)
+   - `https://your-domain.vercel.app/api/auth/callback/google` (本番用)
+
+### 3. データベース設定
+
+Vercel Postgresを使用します：
+
+1. Vercelプロジェクトでストレージタブを開く
+2. Postgresデータベースを作成
+3. 環境変数が自動的に設定されます
+
+### 4. 開発サーバー起動
+
 ```bash
 npm install
-cd client && npm install
-```
-
-2. Set up PostgreSQL database:
-```bash
-psql -U your_username -d postgres -f database.sql
-```
-
-3. Update `.env` file with your database credentials:
-```
-DATABASE_URL=postgresql://username:password@localhost:5432/litenote
-PORT=5000
-```
-
-4. Start the application:
-```bash
 npm run dev
 ```
 
-This will start both the backend server (port 5000) and React frontend (port 3000).
+### 5. デプロイ
 
-## API Endpoints
+```bash
+npm run build
+npm start
+```
 
-- `GET /api/notes` - Get all notes
-- `POST /api/notes` - Create a new note
-- `PUT /api/notes/:id` - Update a note
-- `DELETE /api/notes/:id` - Delete a note
+## 技術スタック
+
+- **フレームワーク**: Next.js 14
+- **認証**: NextAuth.js
+- **データベース**: PostgreSQL (Vercel Postgres)
+- **スタイリング**: CSS Modules + インラインスタイル
+- **画像処理**: Sharp
+- **アイコン**: Font Awesome
+- **デプロイ**: Vercel
+
+## 環境変数なしでの使用
+
+本番環境で環境変数が設定されていない場合、適切なエラーメッセージが表示されます。開発環境では警告のみが表示され、アプリケーションは起動します。
+
+## ライセンス
+
+MIT
