@@ -37,12 +37,29 @@ export default function Home() {
   const [isUploadingNewNote, setIsUploadingNewNote] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [copyMessage, setCopyMessage] = useState('');
+  const [envStatus, setEnvStatus] = useState<{
+    hasGoogleOAuth: boolean;
+    missingEnvVars: string[];
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     if (session) {
       fetchNotes();
     }
+    // Check environment status
+    checkEnvironmentStatus();
   }, [session]);
+
+  const checkEnvironmentStatus = async () => {
+    try {
+      const response = await fetch('/api/health');
+      const data = await response.json();
+      setEnvStatus(data);
+    } catch (error) {
+      console.error('Error checking environment status:', error);
+    }
+  };
 
   useEffect(() => {
     let filtered = notes;
@@ -95,7 +112,7 @@ export default function Home() {
   }
 
   if (status === 'unauthenticated') {
-    const hasGoogleCredentials = process.env.NEXT_PUBLIC_HAS_GOOGLE_OAUTH === 'true';
+    const hasGoogleCredentials = envStatus?.hasGoogleOAuth ?? false;
     
     return (
       <div style={{
@@ -119,7 +136,8 @@ export default function Home() {
           borderRadius: '12px',
           boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
           textAlign: 'center',
-          fontFamily: 'inherit'
+          fontFamily: 'inherit',
+          maxWidth: '500px'
         }}>
           <h1 style={{ marginBottom: '1rem', color: '#333', fontFamily: 'inherit' }}>LiteNote</h1>
           {hasGoogleCredentials ? (
@@ -146,9 +164,33 @@ export default function Home() {
             </>
           ) : (
             <div>
-              <p style={{ marginBottom: '1rem', color: '#666', fontFamily: 'inherit' }}>環境変数が設定されていません</p>
-              <p style={{ marginBottom: '2rem', color: '#666', fontFamily: 'inherit', fontSize: '14px' }}>
-                Google OAuthの設定が必要です
+              <p style={{ marginBottom: '1rem', color: '#d32f2f', fontFamily: 'inherit', fontWeight: 'bold' }}>
+                設定が不完全です
+              </p>
+              {envStatus && (
+                <div style={{ 
+                  backgroundColor: '#fff3cd', 
+                  border: '1px solid #ffeaa7',
+                  borderRadius: '8px',
+                  padding: '1rem',
+                  marginBottom: '1rem',
+                  textAlign: 'left'
+                }}>
+                  <p style={{ margin: '0 0 0.5rem 0', fontWeight: 'bold', color: '#856404' }}>
+                    不足している環境変数:
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '1.5rem', color: '#856404', fontSize: '14px' }}>
+                    {envStatus.missingEnvVars.map((envVar, index) => (
+                      <li key={index}>{envVar}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <p style={{ marginBottom: '1rem', color: '#666', fontFamily: 'inherit', fontSize: '14px' }}>
+                Vercelダッシュボードの「Settings > Environment Variables」で設定してください
+              </p>
+              <p style={{ marginBottom: 0, color: '#666', fontFamily: 'inherit', fontSize: '12px' }}>
+                詳細はREADME.mdを参照してください
               </p>
             </div>
           )}

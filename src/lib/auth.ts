@@ -2,12 +2,33 @@ import { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import pool from './db';
 
-// Check for required environment variables only in production
+// Check for required environment variables
 const isProduction = process.env.NODE_ENV === 'production';
+const missingEnvVars: string[] = [];
+
+// Check Google OAuth credentials
+if (!process.env.GOOGLE_CLIENT_ID) missingEnvVars.push('GOOGLE_CLIENT_ID');
+if (!process.env.GOOGLE_CLIENT_SECRET) missingEnvVars.push('GOOGLE_CLIENT_SECRET');
+
+// Check NextAuth secret
+if (!process.env.NEXTAUTH_SECRET) missingEnvVars.push('NEXTAUTH_SECRET');
+
+// Check database credentials
+if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL) {
+  missingEnvVars.push('DATABASE_URL or POSTGRES_URL');
+}
+
 const hasGoogleCredentials = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET;
 
-if (isProduction && !hasGoogleCredentials) {
-  console.error('Missing required Google OAuth environment variables');
+if (missingEnvVars.length > 0) {
+  const message = `Missing environment variables: ${missingEnvVars.join(', ')}`;
+  console.error(message);
+  
+  if (isProduction) {
+    console.error('Please set these environment variables in your Vercel dashboard under Settings > Environment Variables');
+  } else {
+    console.error('Please create a .env.local file with these variables for local development');
+  }
 }
 
 export const authOptions: NextAuthOptions = {
