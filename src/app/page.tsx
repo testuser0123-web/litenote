@@ -187,7 +187,7 @@ export default function Home() {
                 </div>
               )}
               <p style={{ marginBottom: '1rem', color: '#666', fontFamily: 'inherit', fontSize: '14px' }}>
-                Vercelダッシュボードの「Settings > Environment Variables」で設定してください
+                Vercelダッシュボードの「Settings &gt; Environment Variables」で設定してください
               </p>
               <p style={{ marginBottom: 0, color: '#666', fontFamily: 'inherit', fontSize: '12px' }}>
                 詳細はREADME.mdを参照してください
